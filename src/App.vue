@@ -31,7 +31,7 @@
 
                 <hr class="w-full border-t border-gray-600 my-4" />
                 <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    <div v-for="t in tickers" :key="t.name" @click="sel = t" :class="sel == t ? 'border-4' : ''"
+                    <div v-for="t in tickers" :key="t.name" @click="select(t)" :class="sel == t ? 'border-4' : ''"
                         class="bg-white overflow-hidden shadow rounded-lg border-purple-800 border-solid cursor-pointer">
 
                         <div class="px-4 py-5 sm:p-6 text-center">
@@ -63,7 +63,8 @@
                     {{ sel.name }}
                 </h3>
                 <div class="flex items-end border-gray-600 border-b border-l h-64">
-                    <div v-for="(bar, idx) in graph" :key="idx" class="bg-purple-800 border w-10 h-24"></div>
+                    <div v-for="(bar, idx) in normalizeGraph()" :key="idx" :style="{ height: `${bar}%` }"
+                        class="bg-purple-800 border w-10 "></div>
 
                 </div>
                 <button @click="sel = null" type="button" class="absolute top-0 right-0">
@@ -83,6 +84,7 @@
 </template>
 
 <script >
+
 export default {
     name: "App",
 
@@ -111,16 +113,28 @@ export default {
                 if (this.sel?.name == newTicker.name) {
                     this.graph.push(data.USD);
                 }
-                console.log(this.graph)
 
-            }, 3000)
+
+            }, 5000)
             this.ticker = '';
+        },
+
+        select(ticker) {
+            this.sel = ticker;
+            this.graph = [];
         },
 
         handlerDelete(tickerToRemove) {
             this.tickers = this.tickers.filter(t => t !== tickerToRemove);
 
-        }
+        },
+        normalizeGraph() {
+            const maxValue = Math.max(...this.graph);
+            const minValue = Math.min(...this.graph);
+            return this.graph.map(
+                price => 5 + ((price - minValue) * 95) / (maxValue - minValue)
+            );
+        },
     }
 };
 </script>
